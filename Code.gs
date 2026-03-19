@@ -4,6 +4,22 @@
 var SPREADSHEET_ID = '1sRHhSsVlvYMS5X0HOQkOk1nbmcn_CHESh60WIBK3HV8';
 var SHEET_INVENTORY = '庫存狀態';
 var SHEET_REPORT = '維修通報';
+var PHOTO_FOLDER_NAME = '設備通報照片';
+
+/**
+ * 授權測試用 — 執行一次就可以刪掉
+ * 這個函式會觸發 Drive 和 Gmail 的權限授權
+ */
+function authorizeDrive() {
+  var folders = DriveApp.getFoldersByName(PHOTO_FOLDER_NAME);
+  if (folders.hasNext()) {
+    Logger.log('資料夾已存在：' + folders.next().getName());
+  } else {
+    var folder = DriveApp.createFolder(PHOTO_FOLDER_NAME);
+    Logger.log('已建立資料夾：' + folder.getName());
+  }
+  Logger.log('Drive 授權成功！');
+}
 
 /**
  * 處理 GET 請求：查詢設備資訊，回傳 HTML 頁面
@@ -28,7 +44,17 @@ function submitReport(data) {
   var ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   var sheet = ss.getSheetByName(SHEET_REPORT);
 
-  sheet.appendRow([
+  // 處理照片上傳
+  var photoUrl = '';
+  if (data.photoData) {
+    photoUrl = uploadPhoto(data.sn, data.photoData, data.photoName);
+  }
+
+  // 找到最後一筆有資料的列，避免跳到空白列
+  var lastRow = sheet.getLastRow();
+  var newRow = lastRow + 1;
+
+  var rowData = [
     new Date(),            // 通報時間
     data.sn,               // SN
     data.bluetoothName,    // 藍芽名稱
@@ -36,14 +62,26 @@ function submitReport(data) {
     data.issue,            // 問題項目
     data.description,      // 補充描述
     data.reporter          // 通報人
-  ]);
+  ];
+
+  sheet.getRange(newRow, 1, 1, rowData.length).setValues([rowData]);
+
+  // 照片連結寫成可點擊的超連結
+  if (photoUrl) {
+    var cell = sheet.getRange(newRow, 8);
+    var richText = SpreadsheetApp.newRichTextValue()
+      .setText('查看照片')
+      .setLinkUrl(photoUrl)
+      .build();
+    cell.setRichTextValue(richText);
+  }
 
   // 寄 Gmail 通知
-  var adminEmail = Session.getActiveUser().getEmail();
+  var adminEmail = 'jacky.lin@gptt.com.tw';
   var urgencyTag = data.urgency === '緊急' ? '[緊急] ' : '';
-  var subject = urgencyTag + '設備通報 — ' + data.bluetoothName + ' (' + data.sn + ')';
+  var subject = urgencyTag + '設備故障通報' + data.sn;
 
-  var body = [
+  var bodyParts = [
     '全球動力科技 設備維修通報',
     '══════════════════════',
     '',
@@ -53,15 +91,51 @@ function submitReport(data) {
     '問題項目：' + data.issue,
     '補充描述：' + (data.description || '無'),
     '通報人：' + data.reporter,
-    '通報時間：' + new Date().toLocaleString('zh-TW'),
-    '',
-    '══════════════════════',
-    '此通知由全球動力科技設備通報系統自動發送'
-  ].join('\n');
+    '通報時間：' + new Date().toLocaleString('zh-TW')
+  ];
 
-  GmailApp.sendEmail(adminEmail, subject, body);
+  if (photoUrl) {
+    bodyParts.push('照片：' + photoUrl);
+  }
+
+  bodyParts.push('');
+  bodyParts.push('══════════════════════');
+  bodyParts.push('此通知由全球動力科技設備通報系統自動發送');
+
+  GmailApp.sendEmail(adminEmail, subject, bodyParts.join('\n'));
 
   return { status: 'success' };
+}
+
+/**
+ * 上傳照片到 Google Drive 指定資料夾
+ */
+function uploadPhoto(sn, base64Data, fileName) {
+  // 取得或建立資料夾
+  var folders = DriveApp.getFoldersByName(PHOTO_FOLDER_NAME);
+  var folder;
+  if (folders.hasNext()) {
+    folder = folders.next();
+  } else {
+    folder = DriveApp.createFolder(PHOTO_FOLDER_NAME);
+  }
+
+  // 解析 base64 資料
+  var contentType = base64Data.split(';')[0].split(':')[1];
+  var base64 = base64Data.split(',')[1];
+  var decoded = Utilities.base64Decode(base64);
+  var blob = Utilities.newBlob(decoded, contentType);
+
+  // 檔名格式：2026-03-19_14:44(sn:01000011001).jpg
+  var ext = fileName.split('.').pop() || 'jpg';
+  var dateStr = Utilities.formatDate(new Date(), 'Asia/Taipei', 'yyyy-MM-dd_HH:mm');
+  var newFileName = dateStr + '(sn:' + sn + ').' + ext;
+  blob.setName(newFileName);
+
+  var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  return file.getUrl();
 }
 
 /**
