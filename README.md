@@ -16,6 +16,8 @@
 | **GitHub Repo** | `https://github.com/gptt-jacky/GPTT_Weapon_Management` |
 | **管理者通知信箱** | `jacky.lin@gptt.com.tw` |
 | **照片存放資料夾** | Google Drive「設備通報照片」（自動建立、任何人可檢視） |
+| **架構簡報頁面（GitHub Pages）** | `https://gptt-jacky.github.io/GPTT_Weapon_Management/architecture.html` |
+| **公司 Logo URL** | `https://lh3.googleusercontent.com/d/1twUDfXEAdYkb82ZVlhaJhd1zi-0ePzi6` |
 
 ---
 
@@ -152,7 +154,8 @@ SUT資產管理/
 ├── DEVLOG.md           ← 開發紀錄
 ├── requirements.md     ← 需求規格書
 ├── Code.gs             ← Google Apps Script 後端程式碼
-└── index.html          ← 前端頁面（HTML + CSS + JS）
+├── index.html          ← 前端頁面（HTML + CSS + JS）
+└── architecture.html   ← 互動式架構簡報（GitHub Pages 公開）
 ```
 
 ---
