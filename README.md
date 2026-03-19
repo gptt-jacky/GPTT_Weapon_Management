@@ -178,8 +178,18 @@ SUT資產管理/
 
 ---
 
+## 已知問題
+
+| 問題 | 原因 | 解法 |
+|------|------|------|
+| iPhone Safari 無法開啟部署 URL | Safari 擋 Apps Script 的重新導向 | 使用短網址（reurl.cc）包一層 |
+| QR Code 掃描失敗 | URL 120+ 字元太長，QR Code 容錯率低 | 同上，短網址大幅縮短 |
+
+> iPhone Chrome、Android、電腦瀏覽器皆正常。
+
 ## 待辦 / 下一步
 
 - [ ] 收集所有設備 SN → 產出每個設備的完整 URL（供 NFC 燒錄 / QR Code 產生）
+- [ ] 批次建立短網址（reurl.cc），解決 Safari + QR Code 問題
 - [ ] 通知信件未來可能改為一次發給多人
 - [ ] SN 命名規則可能大改（不影響程式碼，只需更新試算表）
