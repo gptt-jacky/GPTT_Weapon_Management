@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<!-- SUT 武器資產管理系統 — 互動式架構簡報 -->
+<!-- 最後更新: 2026/03/19 -->
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SUT 系統架構簡報 — 全球動力科技</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+
+    :root {
+      --trigger: #6C5CE7;
+      --trigger-bg: #f0edff;
+      --frontend: #E17055;
+      --frontend-bg: #fff0ec;
+      --backend: #00B894;
+      --backend-bg: #e6faf4;
+      --data: #0984E3;
+      --data-bg: #e8f4fd;
+      --dark: #2d3436;
+      --gray: #636e72;
+      --light: #f8f9fa;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Noto Sans TC', -apple-system, sans-serif;
+      background: #0f0f1a;
+      color: #fff;
+      overflow-x: hidden;
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #0f0f1a 0%, #1a1a3e 50%, #0f0f1a 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(108,92,231,0.15) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      animation: floatOrb 8s ease-in-out infinite;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,184,148,0.1) 0%, transparent 70%);
+      bottom: -100px;
+      left: -100px;
+      animation: floatOrb 6s ease-in-out infinite reverse;
+    }
+
+    @keyframes floatOrb {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(30px, -30px) scale(1.1); }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 20px;
+      background: rgba(108,92,231,0.2);
+      border: 1px solid rgba(108,92,231,0.4);
+      border-radius: 50px;
+      font-size: 14px;
+      color: #a29bfe;
+      margin-bottom: 24px;
+      animation: fadeInDown 0.8s ease;
+      letter-spacing: 2px;
+    }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      animation: fadeInDown 0.8s ease 0.2s both;
+      background: linear-gradient(135deg, #fff 0%, #a29bfe 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: clamp(16px, 2vw, 20px);
+      color: #b2bec3;
+      max-width: 600px;
+      line-height: 1.6;
+      animation: fadeInDown 0.8s ease 0.4s both;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 40px;
+      margin-top: 48px;
+      animation: fadeInUp 0.8s ease 0.6s both;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat .number {
+      font-size: 36px;
+      font-weight: 900;
+      color: #6C5CE7;
+    }
+
+    .hero-stat .label {
+      font-size: 13px;
+      color: #636e72;
+      margin-top: 4px;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 32px;
+      animation: bounce 2s infinite;
+      color: #636e72;
+      font-size: 13px;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      display: block;
+      width: 2px;
+      height: 24px;
+      background: linear-gradient(to bottom, #636e72, transparent);
+      margin: 8px auto 0;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+
+    /* ===== Section Common ===== */
+    section {
+      padding: 80px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(24px, 3.5vw, 36px);
+      font-weight: 900;
+      margin-bottom: 12px;
+      line-height: 1.3;
+    }
+
+    .section-desc {
+      font-size: 16px;
+      color: #b2bec3;
+      max-width: 640px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+    }
+
+    /* ===== Architecture Diagram ===== */
+    .arch-section {
+      padding: 80px 20px;
+      background: linear-gradient(180deg, #0f0f1a 0%, #141428 100%);
+    }
+
+    .arch-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .arch-flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+    }
+
+    .arch-layer {
+      border-radius: 16px;
+      padding: 28px 32px;
+      position: relative;
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .arch-layer.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .arch-layer:nth-child(2) { transition-delay: 0.15s; }
+    .arch-layer:nth-child(3) { transition-delay: 0.3s; }
+    .arch-layer:nth-child(4) { transition-delay: 0.45s; }
+
+    .layer-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+    }
+
+    .layer-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .layer-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .layer-item {
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(4px);
+      transition: all 0.3s;
+    }
+
+    .layer-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+
+    /* Layer colors */
+    .layer-trigger { background: rgba(108,92,231,0.1); border: 1px solid rgba(108,92,231,0.3); }
+    .layer-trigger .layer-tag { background: var(--trigger); color: #fff; }
+    .layer-trigger .layer-item { border-color: rgba(108,92,231,0.3); }
+    .layer-trigger .layer-item:hover { background: rgba(108,92,231,0.2); }
+
+    .layer-frontend { background: rgba(225,112,85,0.1); border: 1px solid rgba(225,112,85,0.3); }
+    .layer-frontend .layer-tag { background: var(--frontend); color: #fff; }
+    .layer-frontend .layer-item { border-color: rgba(225,112,85,0.3); }
+    .layer-frontend .layer-item:hover { background: rgba(225,112,85,0.2); }
+
+    .layer-backend { background: rgba(0,184,148,0.1); border: 1px solid rgba(0,184,148,0.3); }
+    .layer-backend .layer-tag { background: var(--backend); color: #fff; }
+    .layer-backend .layer-item { border-color: rgba(0,184,148,0.3); }
+    .layer-backend .layer-item:hover { background: rgba(0,184,148,0.2); }
+
+    .layer-data { background: rgba(9,132,227,0.1); border: 1px solid rgba(9,132,227,0.3); }
+    .layer-data .layer-tag { background: var(--data); color: #fff; }
+    .layer-data .layer-item { border-color: rgba(9,132,227,0.3); }
+    .layer-data .layer-item:hover { background: rgba(9,132,227,0.2); }
+
+    /* Flow arrows between layers */
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 0;
+      color: #636e72;
+      position: relative;
+    }
+
+    .flow-arrow .arrow-line {
+      width: 2px;
+      height: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .flow-arrow .arrow-line::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(108,92,231,0.6), rgba(0,184,148,0.6));
+    }
+
+    .flow-arrow .arrow-line::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 16px;
+      background: rgba(255,255,255,0.6);
+      animation: flowDown 1.5s linear infinite;
+    }
+
+    @keyframes flowDown {
+      0% { top: -16px; }
+      100% { top: 100%; }
+    }
+
+    .flow-arrow .arrow-label {
+      position: absolute;
+      left: calc(50% + 20px);
+      font-size: 13px;
+      color: #b2bec3;
+      white-space: nowrap;
+      background: rgba(15,15,26,0.8);
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .flow-arrow svg {
+      position: absolute;
+      bottom: 4px;
+    }
+
+    /* ===== Screenshot Showcase ===== */
+    .showcase-section {
+      padding: 80px 20px;
+      background: linear-gradient(180deg, #141428 0%, #0f0f1a 100%);
+    }
+
+    .showcase-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+    }
+
+    .phone-frame {
+      width: 280px;
+      margin: 0 auto;
+      background: #1a1a2e;
+      border-radius: 32px;
+      padding: 12px;
+      box-shadow:
+        0 0 0 2px rgba(255,255,255,0.1),
+        0 20px 60px rgba(0,0,0,0.5),
+        0 0 80px rgba(108,92,231,0.1);
+      position: relative;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .phone-frame.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .phone-notch {
+      width: 100px;
+      height: 24px;
+      background: #1a1a2e;
+      border-radius: 0 0 16px 16px;
+      margin: 0 auto 0;
+      position: relative;
+      z-index: 2;
+    }
+
+    .phone-screen {
+      border-radius: 20px;
+      overflow: hidden;
+      background: #f0f2f5;
+    }
+
+    .phone-screen img {
+      width: 100%;
+      display: block;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      opacity: 0;
+      transform: translateX(40px);
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+    }
+
+    .feature-list.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      padding: 20px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.3s;
+    }
+
+    .feature-item:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateX(4px);
+    }
+
+    .feature-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .feature-item h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .feature-item p {
+      font-size: 13px;
+      color: #b2bec3;
+      line-height: 1.5;
+    }
+
+    /* ===== Data Flow Section ===== */
+    .dataflow-section {
+      padding: 80px 20px;
+      background: #0f0f1a;
+    }
+
+    .dataflow-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .flow-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0;
+      position: relative;
+    }
+
+    .flow-step {
+      text-align: center;
+      padding: 32px 20px;
+      position: relative;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flow-step.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .flow-step:nth-child(2) { transition-delay: 0.1s; }
+    .flow-step:nth-child(3) { transition-delay: 0.2s; }
+    .flow-step:nth-child(4) { transition-delay: 0.3s; }
+    .flow-step:nth-child(5) { transition-delay: 0.4s; }
+
+    .step-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      margin: 0 auto 16px;
+      position: relative;
+    }
+
+    .step-icon::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 16px;
+      animation: pulse 2s ease-in-out infinite;
+      opacity: 0.3;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.15); opacity: 0; }
+    }
+
+    .flow-step h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .flow-step p {
+      font-size: 13px;
+      color: #636e72;
+      line-height: 1.5;
+    }
+
+    .step-connector {
+      position: absolute;
+      top: 60px;
+      right: -12px;
+      color: #636e72;
+      font-size: 18px;
+      z-index: 2;
+      animation: arrowPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes arrowPulse {
+      0%, 100% { opacity: 0.4; transform: translateX(0); }
+      50% { opacity: 1; transform: translateX(4px); }
+    }
+
+    /* ===== Tech Stack ===== */
+    .tech-section {
+      padding: 80px 20px;
+      background: linear-gradient(180deg, #0f0f1a 0%, #141428 100%);
+    }
+
+    .tech-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .tech-card {
+      padding: 24px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: all 0.3s;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .tech-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .tech-card:nth-child(2) { transition-delay: 0.1s; }
+    .tech-card:nth-child(3) { transition-delay: 0.2s; }
+    .tech-card:nth-child(4) { transition-delay: 0.3s; }
+    .tech-card:nth-child(5) { transition-delay: 0.4s; }
+    .tech-card:nth-child(6) { transition-delay: 0.5s; }
+
+    .tech-card:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-4px);
+    }
+
+    .tech-card .tech-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+    }
+
+    .tech-card h3 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .tech-card p {
+      font-size: 13px;
+      color: #b2bec3;
+      line-height: 1.5;
+    }
+
+    /* ===== URL Spec ===== */
+    .url-section {
+      padding: 80px 20px;
+      background: #141428;
+    }
+
+    .url-container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .url-box {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(108,92,231,0.3);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 32px;
+      font-family: 'Courier New', monospace;
+      overflow-x: auto;
+    }
+
+    .url-box .url-label {
+      font-family: 'Noto Sans TC', sans-serif;
+      font-size: 13px;
+      color: #636e72;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .url-box .url-text {
+      font-size: 14px;
+      color: #dfe6e9;
+      word-break: break-all;
+      line-height: 1.8;
+    }
+
+    .url-box .url-text .highlight {
+      color: #6C5CE7;
+      font-weight: 700;
+    }
+
+    .url-box .url-text .param {
+      color: #00B894;
+      font-weight: 700;
+    }
+
+    .url-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+    }
+
+    .url-table th, .url-table td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+
+    .url-table th {
+      color: #b2bec3;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .url-table code {
+      background: rgba(108,92,231,0.2);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #a29bfe;
+    }
+
+    /* ===== Footer ===== */
+    .footer {
+      padding: 40px 20px;
+      text-align: center;
+      color: #636e72;
+      font-size: 13px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .footer a {
+      color: #6C5CE7;
+      text-decoration: none;
+    }
+
+    /* ===== Animations ===== */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .showcase-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .phone-frame {
+        width: 240px;
+      }
+
+      .hero-stats {
+        gap: 24px;
+      }
+
+      .flow-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .step-connector {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ===== Hero ===== -->
+  <div class="hero">
+    <div class="hero-badge">GLOBAL POWER TECHNOLOGIES</div>
+    <h1>SUT 武器資產管理<br>與通報系統</h1>
+    <p>透過 NFC 感應，一掃即查、一掃即報<br>零伺服器成本、即時同步、全 Google 生態整合</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="number">NFC</div>
+        <div class="label">觸發方式</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">0</div>
+        <div class="label">伺服器成本</div>
+      </div>
+      <div class="hero-stat">
+        <div class="number">3s</div>
+        <div class="label">通報完成時間</div>
+      </div>
+    </div>
+    <div class="scroll-hint">SCROLL</div>
+  </div>
+
+  <!-- ===== Architecture Layers ===== -->
+  <div class="arch-section">
+    <div class="arch-container">
+      <div class="section-label" style="background:rgba(108,92,231,0.2);color:#a29bfe;">ARCHITECTURE</div>
+      <div class="section-title">系統架構 — 四層分離設計</div>
+      <div class="section-desc">觸發層、前端、後端、資料層完全解耦，任一層獨立修改不影響其他層。</div>
+
+      <div class="arch-flow">
+
+        <!-- Layer 1: Trigger -->
+        <div class="arch-layer layer-trigger">
+          <div class="layer-tag">TRIGGER 觸發層</div>
+          <div class="layer-title">NFC 貼紙 / QR Code</div>
+          <div class="layer-items">
+            <div class="layer-item">NTAG213 NFC</div>
+            <div class="layer-item">144 bytes</div>
+            <div class="layer-item">URL 只帶 SN 參數</div>
+            <div class="layer-item">一張貼紙 = 一件武器</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">?sn={SN值}</div>
+        </div>
+
+        <!-- Layer 2: Frontend -->
+        <div class="arch-layer layer-frontend">
+          <div class="layer-tag">FRONTEND 前端</div>
+          <div class="layer-title">手機瀏覽器 (index.html)</div>
+          <div class="layer-items">
+            <div class="layer-item">設備資訊卡片</div>
+            <div class="layer-item">維修通報表單</div>
+            <div class="layer-item">更新狀態表單</div>
+            <div class="layer-item">照片拍攝/上傳</div>
+            <div class="layer-item">Loading 動畫</div>
+            <div class="layer-item">Toast 通知</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">google.script.run</div>
+        </div>
+
+        <!-- Layer 3: Backend -->
+        <div class="arch-layer layer-backend">
+          <div class="layer-tag">BACKEND 後端</div>
+          <div class="layer-title">Google Apps Script (Code.gs)</div>
+          <div class="layer-items">
+            <div class="layer-item">doGet() 回傳頁面</div>
+            <div class="layer-item">lookupDevice() 查詢</div>
+            <div class="layer-item">submitReport() 通報</div>
+            <div class="layer-item">updateDevice() 更新</div>
+            <div class="layer-item">uploadPhoto() 上傳</div>
+            <div class="layer-item">GmailApp 寄信</div>
+          </div>
+        </div>
+
+        <div class="flow-arrow">
+          <div class="arrow-line"></div>
+          <div class="arrow-label">SpreadsheetApp / DriveApp / GmailApp</div>
+        </div>
+
+        <!-- Layer 4: Data -->
+        <div class="arch-layer layer-data">
+          <div class="layer-tag">DATA 資料層</div>
+          <div class="layer-title">Google Workspace</div>
+          <div class="layer-items">
+            <div class="layer-item">Google Sheets — 庫存狀態</div>
+            <div class="layer-item">Google Sheets — 維修通報</div>
+            <div class="layer-item">Google Drive — 設備通報照片</div>
+            <div class="layer-item">Gmail — 通知信件</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Screenshot Showcase ===== -->
+  <div class="showcase-section">
+    <div class="showcase-container">
+      <div class="section-label" style="background:rgba(225,112,85,0.2);color:#E17055;">INTERFACE</div>
+      <div class="section-title">前端介面 — 行動優先設計</div>
+      <div class="section-desc">為現場人員的手機操作最佳化，掃描 NFC 後 3 秒內即可完成通報。</div>
+
+      <div class="showcase-grid">
+        <div class="phone-frame" id="phone1">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <!-- 用 data URI 放截圖，或直接引用本地檔 -->
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='480' fill='%23f0f2f5'%3E%3Crect width='256' height='480' rx='0'/%3E%3Ctext x='128' y='60' text-anchor='middle' font-family='sans-serif' font-size='11' fill='%23999'%3E%E5%85%A8%E7%90%83%E5%8B%95%E5%8A%9B%E7%A7%91%E6%8A%80%3C/text%3E%3Ctext x='128' y='78' text-anchor='middle' font-family='sans-serif' font-size='10' fill='%23999'%3E%E8%A8%AD%E5%82%99%E9%80%9A%E5%A0%B1%E7%B3%BB%E7%B5%B1%3C/text%3E%3Crect x='20' y='100' width='216' height='160' rx='12' fill='%233380ad'/%3E%3Ctext x='36' y='130' font-family='sans-serif' font-size='16' font-weight='bold' fill='white'%3EBT_G22_1%3C/text%3E%3Ctext x='36' y='158' font-family='sans-serif' font-size='11' fill='rgba(255,255,255,0.8)'%3ESN%3C/text%3E%3Ctext x='220' y='158' text-anchor='end' font-family='sans-serif' font-size='11' font-weight='bold' fill='white'%3E01000011001%3C/text%3E%3Ctext x='36' y='180' font-family='sans-serif' font-size='11' fill='rgba(255,255,255,0.8)'%3E%E8%B2%BC%E7%B4%99%E7%B7%A8%E8%99%9F%3C/text%3E%3Ctext x='220' y='180' text-anchor='end' font-family='sans-serif' font-size='11' font-weight='bold' fill='white'%3E1%3C/text%3E%3Ctext x='36' y='202' font-family='sans-serif' font-size='11' fill='rgba(255,255,255,0.8)'%3E%E4%BD%BF%E7%94%A8%E6%A7%8D%E6%9E%9D%3C/text%3E%3Ctext x='220' y='202' text-anchor='end' font-family='sans-serif' font-size='11' font-weight='bold' fill='white'%3EG22%3C/text%3E%3Ctext x='36' y='224' font-family='sans-serif' font-size='11' fill='rgba(255,255,255,0.8)'%3E%E7%8B%80%E6%85%8B%3C/text%3E%3Ctext x='220' y='224' text-anchor='end' font-family='sans-serif' font-size='11' font-weight='bold' fill='white'%3E%E6%B8%AC%E8%A9%A6%E5%8D%80%3C/text%3E%3Ctext x='36' y='246' font-family='sans-serif' font-size='11' fill='rgba(255,255,255,0.8)'%3E%E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE%3C/text%3E%3Ctext x='220' y='246' text-anchor='end' font-family='sans-serif' font-size='11' font-weight='bold' fill='white'%3E%E5%A4%A7%E5%AE%89%3C/text%3E%3Crect x='20' y='280' width='216' height='44' rx='12' fill='white' stroke='%23e0e0e0'/%3E%3Ctext x='36' y='307' font-family='sans-serif' font-size='13' font-weight='600' fill='%23666'%3E%E7%B6%AD%E4%BF%AE%E9%80%9A%E5%A0%B1%3C/text%3E%3Ctext x='220' y='307' text-anchor='end' font-family='sans-serif' font-size='10' fill='%23999'%3E%E2%96%BC%3C/text%3E%3Crect x='20' y='336' width='216' height='44' rx='12' fill='white' stroke='%23e0e0e0'/%3E%3Ctext x='36' y='363' font-family='sans-serif' font-size='12' font-weight='600' fill='%23666'%3E%E6%9B%B4%E6%96%B0%E8%A8%AD%E5%82%99%E7%8B%80%E6%85%8B / %E5%AD%98%E6%94%BE%E4%BD%8D%E7%BD%AE%3C/text%3E%3Ctext x='220' y='363' text-anchor='end' font-family='sans-serif' font-size='10' fill='%23999'%3E%E2%96%BC%3C/text%3E%3C/svg%3E" alt="SUT 設備通報系統 - 設備資訊頁面">
+          </div>
+        </div>
+
+        <div class="feature-list" id="features1">
+          <div class="feature-item">
+            <div class="feature-icon" style="background:rgba(108,92,231,0.15);color:#6C5CE7;">1</div>
+            <div>
+              <h3>設備資訊卡片</h3>
+              <p>掃描 NFC 後自動顯示藍芽名稱、SN、貼紙編號、使用槍枝、狀態、存放位置</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:rgba(225,112,85,0.15);color:#E17055;">2</div>
+            <div>
+              <h3>維修通報</h3>
+              <p>緊急程度、問題複選（電池/外觀/感測/零件鬆脫/其他）、拍照上傳、補充描述</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:rgba(0,184,148,0.15);color:#00B894;">3</div>
+            <div>
+              <h3>更新設備狀態</h3>
+              <p>即時更改狀態（展示/維修/測試區）與存放位置（大安/蘆洲），支援自訂輸入</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon" style="background:rgba(9,132,227,0.15);color:#0984E3;">4</div>
+            <div>
+              <h3>即時通知</h3>
+              <p>通報送出後自動寄 Gmail 通知管理者，緊急通報標題加 [緊急] 標記</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Data Flow ===== -->
+  <div class="dataflow-section">
+    <div class="dataflow-container">
+      <div class="section-label" style="background:rgba(0,184,148,0.2);color:#00B894;">DATA FLOW</div>
+      <div class="section-title">資料流 — 從掃描到通知</div>
+      <div class="section-desc">完整的使用者操作路徑，每一步都即時回饋。</div>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="step-icon" style="background:rgba(108,92,231,0.15);">
+            <span>1</span>
+            <span style="position:absolute;background:rgba(108,92,231,0.15);width:100%;height:100%;border-radius:16px;animation:pulse 2s ease-in-out infinite;"></span>
+          </div>
+          <h3 style="color:#a29bfe;">掃描 NFC</h3>
+          <p>手機感應 NFC 貼紙<br>自動開啟瀏覽器</p>
+          <span class="step-connector">&rarr;</span>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon" style="background:rgba(225,112,85,0.15);">
+            <span>2</span>
+          </div>
+          <h3 style="color:#E17055;">載入頁面</h3>
+          <p>Apps Script 查表<br>帶入設備資訊</p>
+          <span class="step-connector">&rarr;</span>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon" style="background:rgba(253,203,110,0.15);">
+            <span>3</span>
+          </div>
+          <h3 style="color:#FDCB6E;">填寫表單</h3>
+          <p>選擇問題項目<br>拍照 + 填描述</p>
+          <span class="step-connector">&rarr;</span>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon" style="background:rgba(0,184,148,0.15);">
+            <span>4</span>
+          </div>
+          <h3 style="color:#00B894;">送出通報</h3>
+          <p>寫入試算表<br>上傳照片到 Drive</p>
+          <span class="step-connector">&rarr;</span>
+        </div>
+
+        <div class="flow-step">
+          <div class="step-icon" style="background:rgba(9,132,227,0.15);">
+            <span>5</span>
+          </div>
+          <h3 style="color:#0984E3;">Gmail 通知</h3>
+          <p>管理者即時收到<br>含完整通報內容</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Tech Stack ===== -->
+  <div class="tech-section">
+    <div class="tech-container">
+      <div class="section-label" style="background:rgba(9,132,227,0.2);color:#74b9ff;">TECH STACK</div>
+      <div class="section-title">技術選型</div>
+      <div class="section-desc">全部建構在 Google Workspace 上，零額外成本、零伺服器維運。</div>
+
+      <div class="tech-grid">
+        <div class="tech-card">
+          <div class="tech-icon">&#x1F4F1;</div>
+          <h3>HTML / CSS / JS</h3>
+          <p>前端頁面，行動裝置優先，跑在手機瀏覽器</p>
+        </div>
+        <div class="tech-card">
+          <div class="tech-icon">&#x2699;</div>
+          <h3>Google Apps Script</h3>
+          <p>後端邏輯，doGet 回傳頁面，google.script.run 處理資料</p>
+        </div>
+        <div class="tech-card">
+          <div class="tech-icon">&#x1F4CA;</div>
+          <h3>Google Sheets</h3>
+          <p>資料庫，庫存狀態 + 維修通報兩張工作表</p>
+        </div>
+        <div class="tech-card">
+          <div class="tech-icon">&#x1F4C1;</div>
+          <h3>Google Drive</h3>
+          <p>照片儲存，自動建立資料夾，公開可檢視</p>
+        </div>
+        <div class="tech-card">
+          <div class="tech-icon">&#x2709;</div>
+          <h3>Gmail</h3>
+          <p>通知信件，緊急通報自動加 [緊急] 標記</p>
+        </div>
+        <div class="tech-card">
+          <div class="tech-icon">&#x1F4E1;</div>
+          <h3>NFC / NTAG213</h3>
+          <p>觸發介面，每張貼紙燒入唯一 SN 的完整 URL</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== URL Spec ===== -->
+  <div class="url-section">
+    <div class="url-container">
+      <div class="section-label" style="background:rgba(108,92,231,0.2);color:#a29bfe;">URL SPEC</div>
+      <div class="section-title">NFC / QR Code URL 規格</div>
+      <div class="section-desc">每張 NFC 貼紙燒入以下格式的 URL，SN 對應試算表中的設備序號。</div>
+
+      <div class="url-box">
+        <div class="url-label">URL 格式</div>
+        <div class="url-text">
+          <span class="highlight">https://script.google.com/macros/s/AKfycby.../exec</span><span class="param">?sn={SN}</span>
+        </div>
+      </div>
+
+      <div class="url-box" style="margin-top:16px;">
+        <div class="url-label">完整範例</div>
+        <div class="url-text">
+          https://script.google.com/macros/s/AKfycbyjrhodTovCfPsBRnm2vgPvIMconAToVxxO5IEy4T24PVSSdJkg9zggUfLjzenJqv-_/exec<span class="param">?sn=01000011001</span>
+        </div>
+      </div>
+
+      <table class="url-table">
+        <tr>
+          <th>參數</th>
+          <th>說明</th>
+          <th>範例</th>
+        </tr>
+        <tr>
+          <td><code>sn</code></td>
+          <td>設備唯一序號，對應試算表 SN 欄</td>
+          <td><code>01000011001</code></td>
+        </tr>
+        <tr>
+          <td colspan="3" style="color:#636e72;font-size:13px;padding-top:16px;">
+            NFC 貼紙規格：NTAG213（144 bytes）．一張貼紙 = 一個 SN．URL 不變 = NFC 不需重燒
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== Footer ===== -->
+  <div class="footer">
+    <p>SUT 武器資產管理與通報系統 &mdash; 全球動力科技股份有限公司</p>
+    <p style="margin-top:8px;">
+      <a href="https://github.com/gptt-jacky/GPTT_Weapon_Management" target="_blank">GitHub</a>
+      &nbsp;&middot;&nbsp;
+      Version 1.0 &nbsp;&middot;&nbsp; 2026/03/19
+    </p>
+  </div>
+
+  <!-- ===== Scroll Animation Script ===== -->
+  <script>
+    // Intersection Observer for scroll animations
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.15 });
+
+    // Observe all animated elements
+    document.querySelectorAll('.arch-layer, .phone-frame, .feature-list, .flow-step, .tech-card').forEach(function(el) {
+      observer.observe(el);
+    });
+  </script>
+</body>
+</html>
