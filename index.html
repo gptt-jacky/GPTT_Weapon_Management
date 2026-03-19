@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<!-- 全球動力科技 設備通報系統 — 前端頁面 -->
+<!-- 最後更新: 2026/03/19 -->
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>全球動力科技 設備通報系統</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    /* ===== Logo 標題區 ===== */
+    .header {
+      text-align: center;
+      padding: 16px 0 8px;
+    }
+
+    .header img {
+      max-width: 240px;
+      height: auto;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    /* ===== 設備資訊卡片 ===== */
+    .device-card {
+      background: #1a73e8;
+      color: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .device-card h1 {
+      font-size: 20px;
+      margin-bottom: 12px;
+      word-break: break-all;
+    }
+
+    .device-card .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      padding: 4px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .device-card .info-row:last-child { border-bottom: none; }
+    .device-card .label { opacity: 0.8; }
+    .device-card .value { font-weight: 600; }
+
+    /* ===== 錯誤狀態 ===== */
+    .error-card {
+      background: #d93025;
+      color: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .error-card h1 { font-size: 20px; margin-bottom: 8px; }
+    .error-card p { opacity: 0.9; font-size: 14px; }
+
+    /* ===== 通用卡片區塊 ===== */
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      color: #1a73e8;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #555;
+    }
+
+    /* ===== 選項按鈕組 ===== */
+    .options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .options input[type="radio"],
+    .options input[type="checkbox"] {
+      display: none;
+    }
+
+    .options label {
+      flex: 1;
+      min-width: calc(50% - 4px);
+      text-align: center;
+      padding: 10px 8px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .options input[type="radio"]:checked + label,
+    .options input[type="checkbox"]:checked + label {
+      border-color: #1a73e8;
+      background: #e8f0fe;
+      color: #1a73e8;
+    }
+
+    .urgency-options input[value="緊急"]:checked + label {
+      border-color: #d93025;
+      background: #fce8e6;
+      color: #d93025;
+    }
+
+    .status-options input[value="維修"]:checked + label {
+      border-color: #e8710a;
+      background: #fef3e0;
+      color: #e8710a;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+
+    textarea:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: #1a73e8;
+    }
+
+    textarea {
+      height: 80px;
+      resize: vertical;
+    }
+
+    /* ===== 按鈕 ===== */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 8px;
+    }
+
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    .btn-primary { background: #1a73e8; }
+    .btn-primary:hover:not(:disabled) { background: #1557b0; }
+
+    .btn-update { background: #0d904f; }
+    .btn-update:hover:not(:disabled) { background: #0a7a42; }
+
+    /* ===== 結果訊息 ===== */
+    .result {
+      text-align: center;
+      padding: 32px 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .result.success h2 { color: #0d904f; }
+    .result.fail h2 { color: #d93025; }
+    .result p { margin-top: 8px; color: #666; font-size: 14px; }
+
+    /* ===== Toast ===== */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .toast.show { opacity: 1; }
+    .toast.success { background: #0d904f; }
+    .toast.error { background: #d93025; }
+
+    /* ===== 摺疊選單 ===== */
+    .collapsible-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      padding: 16px 20px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #666;
+      transition: all 0.2s;
+    }
+
+    .collapsible-header:hover { background: #f8f9fa; }
+
+    .collapsible-header .arrow {
+      transition: transform 0.3s;
+      font-size: 12px;
+    }
+
+    .collapsible-header.open .arrow {
+      transform: rotate(180deg);
+    }
+
+    .collapsible-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .collapsible-body.open {
+      max-height: 500px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Logo -->
+    <div class="header">
+      <img src="https://lh3.googleusercontent.com/d/1twUDfXEAdYkb82ZVlhaJhd1zi-0ePzi6" alt="全球動力科技">
+      <p>設備通報系統</p>
+    </div>
+
+    <!-- 設備資訊 -->
+    <div id="device-section"></div>
+
+    <!-- 維修通報（主要功能） -->
+    <div class="card" id="report-section" style="display:none;">
+      <h2>維修通報</h2>
+
+      <div class="field">
+        <label>緊急程度</label>
+        <div class="options urgency-options">
+          <input type="radio" name="urgency" id="urgent" value="緊急">
+          <label for="urgent">緊急</label>
+          <input type="radio" name="urgency" id="not-urgent" value="不緊急" checked>
+          <label for="not-urgent">不緊急</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>問題項目（可複選）</label>
+        <div class="options">
+          <input type="checkbox" id="issue-battery" value="電池充不進去">
+          <label for="issue-battery">電池充不進去</label>
+          <input type="checkbox" id="issue-appearance" value="外觀破損">
+          <label for="issue-appearance">外觀破損</label>
+          <input type="checkbox" id="issue-sensor" value="感測效果不佳">
+          <label for="issue-sensor">感測效果不佳</label>
+          <input type="checkbox" id="issue-other" value="其他">
+          <label for="issue-other">其他</label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>補充描述</label>
+        <textarea id="description" placeholder="選填，可補充問題細節..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>通報人</label>
+        <input type="text" id="reporter" placeholder="請輸入姓名或代號">
+      </div>
+
+      <button class="btn btn-primary" id="report-btn" onclick="submitReport()">送出通報</button>
+    </div>
+
+    <!-- 更新狀態（摺疊選單） -->
+    <div id="update-wrapper" style="display:none;">
+      <div class="collapsible-header" id="update-toggle" onclick="toggleUpdate()">
+        <span>更新設備狀態 / 存放位置</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="collapsible-body" id="update-body">
+        <div class="card" style="margin-top: -8px;">
+
+          <div class="field">
+            <label>狀態</label>
+            <div class="options status-options">
+              <input type="radio" name="newStatus" id="st-exhibit" value="展示">
+              <label for="st-exhibit">展示</label>
+              <input type="radio" name="newStatus" id="st-repair" value="維修">
+              <label for="st-repair">維修</label>
+              <input type="radio" name="newStatus" id="st-test" value="測試區">
+              <label for="st-test">測試區</label>
+            </div>
+          </div>
+
+          <div class="field">
+            <label>存放位置</label>
+            <div class="options">
+              <input type="radio" name="newLocation" id="loc-daan" value="大安">
+              <label for="loc-daan">大安</label>
+              <input type="radio" name="newLocation" id="loc-luzhou" value="蘆洲">
+              <label for="loc-luzhou">蘆洲</label>
+              <input type="radio" name="newLocation" id="loc-exhibit" value="展示">
+              <label for="loc-exhibit">展示</label>
+            </div>
+          </div>
+
+          <button class="btn btn-update" id="update-btn" onclick="submitUpdate()">更新狀態</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 結果 -->
+    <div id="result-section" style="display:none;"></div>
+
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // Apps Script 模板注入
+    var sn = <?= sn ? JSON.stringify(sn) : "''" ?>;
+    var deviceInfo = <?!= deviceInfo ?>;
+
+    // ===== 頁面初始化 =====
+    (function init() {
+      var deviceSection = document.getElementById('device-section');
+
+      if (!sn) {
+        deviceSection.innerHTML =
+          '<div class="error-card">' +
+            '<h1>缺少設備編號</h1>' +
+            '<p>請透過 NFC 或 QR Code 掃描開啟此頁面</p>' +
+          '</div>';
+        return;
+      }
+
+      if (!deviceInfo) {
+        deviceSection.innerHTML =
+          '<div class="error-card">' +
+            '<h1>找不到設備</h1>' +
+            '<p>SN：' + sn + ' 不存在於庫存清單中</p>' +
+          '</div>';
+        return;
+      }
+
+      renderDeviceCard();
+      preselectRadio('newStatus', deviceInfo.status);
+      preselectRadio('newLocation', deviceInfo.location);
+
+      document.getElementById('report-section').style.display = 'block';
+      document.getElementById('update-wrapper').style.display = 'block';
+    })();
+
+    function renderDeviceCard() {
+      document.getElementById('device-section').innerHTML =
+        '<div class="device-card">' +
+          '<h1>' + (deviceInfo.bluetoothName || sn) + '</h1>' +
+          '<div class="info-row"><span class="label">SN</span><span class="value">' + deviceInfo.sn + '</span></div>' +
+          '<div class="info-row"><span class="label">貼紙編號</span><span class="value">' + (deviceInfo.stickerNo || '—') + '</span></div>' +
+          '<div class="info-row"><span class="label">使用槍枝</span><span class="value">' + (deviceInfo.gun || '—') + '</span></div>' +
+          '<div class="info-row"><span class="label">狀態</span><span class="value">' + (deviceInfo.status || '—') + '</span></div>' +
+          '<div class="info-row"><span class="label">存放位置</span><span class="value">' + (deviceInfo.location || '—') + '</span></div>' +
+        '</div>';
+    }
+
+    function preselectRadio(name, value) {
+      if (!value) return;
+      var radios = document.querySelectorAll('input[name="' + name + '"]');
+      for (var i = 0; i < radios.length; i++) {
+        if (radios[i].value === String(value).trim()) {
+          radios[i].checked = true;
+        }
+      }
+    }
+
+    // ===== 摺疊選單 =====
+    function toggleUpdate() {
+      var header = document.getElementById('update-toggle');
+      var body = document.getElementById('update-body');
+      header.classList.toggle('open');
+      body.classList.toggle('open');
+    }
+
+    // ===== 維修通報 =====
+    function submitReport() {
+      var urgency = getRadioValue('urgency');
+      var issues = getCheckedValues();
+      var description = document.getElementById('description').value.trim();
+      var reporter = document.getElementById('reporter').value.trim();
+
+      if (issues.length === 0) {
+        alert('請至少選擇一個問題項目');
+        return;
+      }
+      if (!reporter) {
+        alert('請填寫通報人');
+        return;
+      }
+
+      var btn = document.getElementById('report-btn');
+      btn.disabled = true;
+      btn.textContent = '送出中...';
+
+      var payload = {
+        sn: deviceInfo.sn,
+        bluetoothName: deviceInfo.bluetoothName,
+        urgency: urgency,
+        issue: issues.join('、'),
+        description: description,
+        reporter: reporter
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          showResult(true);
+        })
+        .withFailureHandler(function(err) {
+          showResult(false, err.message);
+        })
+        .submitReport(payload);
+    }
+
+    // ===== 更新狀態 =====
+    function submitUpdate() {
+      var newStatus = getRadioValue('newStatus');
+      var newLocation = getRadioValue('newLocation');
+
+      if (!newStatus && !newLocation) {
+        alert('請至少選擇一個要更新的項目');
+        return;
+      }
+
+      var btn = document.getElementById('update-btn');
+      btn.disabled = true;
+      btn.textContent = '更新中...';
+
+      var payload = {
+        sn: deviceInfo.sn,
+        newStatus: newStatus,
+        newLocation: newLocation
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          if (newStatus) deviceInfo.status = newStatus;
+          if (newLocation) deviceInfo.location = newLocation;
+          renderDeviceCard();
+          showToast('狀態已更新', 'success');
+          btn.disabled = false;
+          btn.textContent = '更新狀態';
+        })
+        .withFailureHandler(function(err) {
+          showToast('更新失敗：' + err.message, 'error');
+          btn.disabled = false;
+          btn.textContent = '更新狀態';
+        })
+        .updateDevice(payload);
+    }
+
+    // ===== 工具函式 =====
+    function getRadioValue(name) {
+      var el = document.querySelector('input[name="' + name + '"]:checked');
+      return el ? el.value : '';
+    }
+
+    function getCheckedValues() {
+      var checkboxes = document.querySelectorAll('#report-section input[type="checkbox"]:checked');
+      var values = [];
+      for (var i = 0; i < checkboxes.length; i++) {
+        values.push(checkboxes[i].value);
+      }
+      return values;
+    }
+
+    function showResult(success, errorMsg) {
+      document.getElementById('report-section').style.display = 'none';
+      document.getElementById('update-wrapper').style.display = 'none';
+      var resultSection = document.getElementById('result-section');
+      resultSection.style.display = 'block';
+
+      if (success) {
+        resultSection.innerHTML =
+          '<div class="result success">' +
+            '<h2>通報成功</h2>' +
+            '<p>已通知管理者，感謝您的回報！</p>' +
+          '</div>';
+      } else {
+        resultSection.innerHTML =
+          '<div class="result fail">' +
+            '<h2>送出失敗</h2>' +
+            '<p>' + (errorMsg || '請稍後再試') + '</p>' +
+          '</div>';
+      }
+    }
+
+    function showToast(msg, type) {
+      var toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.className = 'toast ' + (type || 'success');
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>
