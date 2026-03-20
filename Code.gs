@@ -1,5 +1,5 @@
 // 全球動力科技 設備通報系統 — Google Apps Script 後端
-// 最後更新: 2026/03/19
+// 最後更新: 2026/03/20
 
 var SPREADSHEET_ID = '1sRHhSsVlvYMS5X0HOQkOk1nbmcn_CHESh60WIBK3HV8';
 var SHEET_INVENTORY = '庫存狀態';
@@ -77,9 +77,9 @@ function submitReport(data) {
   }
 
   // 寄 Gmail 通知
-  var adminEmail = 'jacky.lin@gptt.com.tw';
+  var adminEmail = 'jacky.lin@gptt.com.tw,syay.shih@gptt.com.tw,yijie.lee@gptt.com.tw,addy.li@gptt.com.tw,peter@gptt.com.tw,kai@gptt.com.tw,milu.tsai@gptt.com.tw';
   var urgencyTag = data.urgency === '緊急' ? '[緊急] ' : '';
-  var subject = urgencyTag + '設備故障通報' + data.sn;
+  var subject = urgencyTag + '設備故障通報_(sn:' + data.sn + ')';
 
   var bodyParts = [
     '全球動力科技 設備維修通報',

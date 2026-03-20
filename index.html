@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- 全球動力科技 設備通報系統 — 前端頁面 -->
-<!-- 最後更新: 2026/03/19 -->
+<!-- 最後更新: 2026/03/20 -->
 
 <html lang="zh-TW">
 <head>
@@ -144,7 +144,7 @@
       color: #d93025;
     }
 
-    .status-options input[value="維修"]:checked + label {
+    .status-options input[value="維修中"]:checked + label {
       border-color: #e8710a;
       background: #fef3e0;
       color: #e8710a;
@@ -393,10 +393,10 @@
             <div class="options status-options">
               <input type="radio" name="newStatus" id="st-exhibit" value="展示">
               <label for="st-exhibit">展示</label>
-              <input type="radio" name="newStatus" id="st-repair" value="維修">
-              <label for="st-repair">維修</label>
-              <input type="radio" name="newStatus" id="st-test" value="測試區">
-              <label for="st-test">測試區</label>
+              <input type="radio" name="newStatus" id="st-repair" value="維修中">
+              <label for="st-repair">維修中</label>
+              <input type="radio" name="newStatus" id="st-test" value="測試區使用">
+              <label for="st-test">測試區使用</label>
             </div>
             <input type="text" id="custom-status" placeholder="或輸入自訂狀態..." style="
               margin-top: 8px;
